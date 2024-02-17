@@ -1,0 +1,59 @@
+service: exocloud-conecta-minha-saude-api
+org: sasakiexocloud
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: prod
+  region: us-east-2
+  memorySize: 512
+  timeout: 5
+  logs:
+    retentionInDays: 30
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "*"
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: "*"
+
+useDotenv: true
+
+custom:
+  logRetentionInDays: 30
+  prune:
+    automatic: true
+    includeLayers: true
+    number: 3
+  dotenv:
+    path: .env
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+  - serverless-dotenv-plugin
+  - serverless-plugin-log-retention
+  - serverless-prune-versions
+
+functions:
+  helloWorld:
+    handler: src/server.handler
+    timeout: 30
+    events:
+      - http:
+          path: /
+          method: get
+          cors:
+            origin: "*"
