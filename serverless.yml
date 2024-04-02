@@ -1,5 +1,6 @@
-service: exocloud-conecta-minha-saude-api
 org: sasakiexocloud
+app: exocloud-conecta-minha-saude-api
+service: exocloud-conecta-minha-saude-api
 
 provider:
   name: aws
@@ -18,7 +19,7 @@ provider:
             - logs:CreateLogGroup
             - logs:CreateLogStream
             - logs:PutLogEvents
-          Resource: "*"
+          Resource: '*'
         - Effect: Allow
           Action:
             - dynamodb:Query
@@ -27,9 +28,12 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
-          Resource: "*"
+          Resource: '*'
 
 useDotenv: true
+
+package:
+  individually: true
 
 custom:
   logRetentionInDays: 30
@@ -48,12 +52,72 @@ plugins:
   - serverless-prune-versions
 
 functions:
-  helloWorld:
+  createUser:
     handler: src/server.handler
     timeout: 30
     events:
       - http:
-          path: /
-          method: get
+          path: /user
+          method: post
           cors:
-            origin: "*"
+            origin: '*'
+  session:
+    handler: src/server.handler
+    timeout: 30
+    events:
+      - http:
+          path: /auth
+          method: post
+          cors:
+            origin: '*'
+
+resources:
+  Resources:
+    UserDynamoDB:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: CMS-User
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: emailIndex
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+    PatientDynamoDB:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: CMS-Patient
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: patientId
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+          - AttributeName: document
+            AttributeType: S
+        KeySchema:
+          - AttributeName: patientId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: emailIndex
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: documentIndex
+            KeySchema:
+              - AttributeName: document
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
