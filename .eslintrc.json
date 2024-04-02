@@ -17,14 +17,25 @@
     "@typescript-eslint",
     "prettier",
     "eslint-plugin-import-helpers",
-    "unused-imports"
+    "unused-imports",
+    "perfectionist"
   ],
   "rules": {
+    "perfectionist/sort-interfaces": "error",
+    "perfectionist/sort-jsx-props": [
+      "error",
+      {
+        "type": "natural",
+        "order": "asc",
+        "groups": ["multiline", "unknown", "shorthand"]
+      }
+    ],
     "prettier/prettier": "error",
     // Disabled rules
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": "off",
     "@typescript-eslint/no-empty-interface": "off",
+
     "react/react-in-jsx-scope": "off",
     "space-before-function-paren": "off",
     "react/prop-types": "off",
